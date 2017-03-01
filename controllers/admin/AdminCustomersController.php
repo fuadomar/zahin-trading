@@ -1,5 +1,13 @@
 <?php
 class AdminCustomersController extends AdminCustomersControllerCore {
+    public function __construct() {
+        parent::__construct();
+
+        if(!$this->context->employee->isSuperAdmin()) {
+            $this->_where = ' AND a.`id_employee` = ' . $this->context->employee->id;
+        }
+    }
+
     public function renderForm()
     {
         /** @var Customer $obj */
@@ -11,7 +19,7 @@ class AdminCustomersController extends AdminCustomersControllerCore {
         $list_genders = array();
         foreach ($genders as $key => $gender) {
             /** @var Gender $gender */
-            $list_genders[$key]['id'] = 'gender_'.$gender->id;
+            $list_genders[$key]['id'] = 'gender_' . $gender->id;
             $list_genders[$key]['value'] = $gender->id;
             $list_genders[$key]['label'] = $gender->name;
         }
@@ -22,33 +30,12 @@ class AdminCustomersController extends AdminCustomersControllerCore {
 
         $groups = Group::getGroups($this->default_form_language, true);
 
-        if($this->context->employee->isSuperAdmin()) {
-            $employees = Employee::getTerritoryManagers();
-        } else {
-            $employees = array($this->context->employee);
-        }
-
         $this->fields_form = array(
             'legend' => array(
                 'title' => $this->l('Customer'),
                 'icon' => 'icon-user'
             ),
             'input' => array(
-                array(
-                    'type' => 'select',
-                    'label' => $this->l('Territory Manager'),
-                    'name' => 'id_employee',
-                    'options' => array(
-                        'query' => $employees,
-                        'id' => 'id_employee',
-                        'name' => 'firstname'
-                    ),
-                    'col' => '4',
-                    'hint' => array(
-                        $this->l('This group will be the user\'s default group.'),
-                        $this->l('Only the discount for the selected group will be applied to this customer.')
-                    )
-                ),
                 array(
                     'type' => 'radio',
                     'label' => $this->l('Social title'),
@@ -63,7 +50,7 @@ class AdminCustomersController extends AdminCustomersControllerCore {
                     'name' => 'firstname',
                     'required' => true,
                     'col' => '4',
-                    'hint' => $this->l('Invalid characters:').' 0-9!&lt;&gt;,;?=+()@#"°{}_$%:'
+                    'hint' => $this->l('Invalid characters:') . ' 0-9!&lt;&gt;,;?=+()@#"°{}_$%:'
                 ),
                 array(
                     'type' => 'text',
@@ -71,7 +58,7 @@ class AdminCustomersController extends AdminCustomersControllerCore {
                     'name' => 'lastname',
                     'required' => true,
                     'col' => '4',
-                    'hint' => $this->l('Invalid characters:').' 0-9!&lt;&gt;,;?=+()@#"°{}_$%:'
+                    'hint' => $this->l('Invalid characters:') . ' 0-9!&lt;&gt;,;?=+()@#"°{}_$%:'
                 ),
                 array(
                     'type' => 'text',
@@ -141,7 +128,7 @@ class AdminCustomersController extends AdminCustomersControllerCore {
                             'label' => $this->l('Disabled')
                         )
                     ),
-                    'disabled' =>  (bool)!Configuration::get('PS_CUSTOMER_NWSL'),
+                    'disabled' => (bool)!Configuration::get('PS_CUSTOMER_NWSL'),
                     'hint' => $this->l('This customer will receive your newsletter via email.')
                 ),
                 array(
@@ -163,7 +150,7 @@ class AdminCustomersController extends AdminCustomersControllerCore {
                             'label' => $this->l('Disabled')
                         )
                     ),
-                    'disabled' =>  (bool)!Configuration::get('PS_CUSTOMER_OPTIN'),
+                    'disabled' => (bool)!Configuration::get('PS_CUSTOMER_OPTIN'),
                     'hint' => $this->l('This customer will receive your ads via email.')
                 ),
             )
@@ -179,6 +166,30 @@ class AdminCustomersController extends AdminCustomersControllerCore {
                 }
             }
         }
+
+        if ($this->context->employee->isSuperAdmin()) {
+            $employees = Employee::getTerritoryManagers();
+        } else {
+            $employees = array($this->context->employee);
+        }
+
+        $this->fields_form['input'] = array_merge(
+            array(
+                array(
+                    'type' => 'select',
+                    'label' => $this->l('Territory Manager'),
+                    'name' => 'id_employee',
+                    'required' => true,
+                    'options' => array(
+                        'query' => $employees,
+                        'id' => 'id',
+                        'name' => 'firstname'
+                    ),
+                    'col' => '4'
+                )
+            ),
+            $this->fields_form['input']
+        );
 
         $this->fields_form['input'] = array_merge(
             $this->fields_form['input'],
