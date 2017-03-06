@@ -55,8 +55,13 @@ class Customer extends CustomerCore {
     public static function searchByName($query, $limit = null)
     {
         $context = ContextCore::getContext();
-        $sql_base = 'SELECT *
-				FROM `'._DB_PREFIX_.'customer` WHERE id_employee = '.$context->employee->id;
+
+        if ($context->employee->isSuperAdmin()) {
+            $sql_base = 'SELECT * FROM `' . _DB_PREFIX_ . 'customer` WHERE 1';
+        } else {
+            $sql_base = 'SELECT * FROM `'._DB_PREFIX_.'customer` WHERE id_employee = '.$context->employee->id;
+        }
+
         $sql = '('.$sql_base.' AND `email` LIKE \'%'.pSQL($query).'%\' '.Shop::addSqlRestriction(Shop::SHARE_CUSTOMER).')';
         $sql .= ' UNION ('.$sql_base.' AND `id_customer` = '.(int)$query.' '.Shop::addSqlRestriction(Shop::SHARE_CUSTOMER).')';
         $sql .= ' UNION ('.$sql_base.' AND `lastname` LIKE \'%'.pSQL($query).'%\' '.Shop::addSqlRestriction(Shop::SHARE_CUSTOMER).')';
