@@ -40,7 +40,7 @@ class Customer extends CustomerCore {
             'id_lang' =>                    array('type' => self::TYPE_INT, 'validate' => 'isUnsignedId', 'copy_post' => false),
             'date_add' =>                    array('type' => self::TYPE_DATE, 'validate' => 'isDate', 'copy_post' => false),
             'date_upd' =>                    array('type' => self::TYPE_DATE, 'validate' => 'isDate', 'copy_post' => false),
-            'id_employee' =>                array('type' => self::TYPE_INT, 'validate' => 'isUnsignedId', 'required' => true),
+            'id_employee' =>                array('type' => self::TYPE_INT, 'validate' => 'isUnsignedId'),
         ),
     );
 
