@@ -1,4 +1,6 @@
 <?php
+include(_PS_MODULE_DIR_.'territory'.DIRECTORY_SEPARATOR.'territory.php');
+
 class AdminCustomersController extends AdminCustomersControllerCore {
     public function __construct() {
         parent::__construct();
@@ -168,22 +170,22 @@ class AdminCustomersController extends AdminCustomersControllerCore {
         }
 
         if ($this->context->employee->isSuperAdmin()) {
-            $employees = Employee::getTerritoryManagers();
+            $territories = Territory::getTerritories();
         } else {
-            $employees = array($this->context->employee);
+            $territories = array($this->context->employee);
         }
 
         $this->fields_form['input'] = array_merge(
             array(
                 array(
                     'type' => 'select',
-                    'label' => $this->l('Territory Manager'),
-                    'name' => 'id_employee',
-                    'required' => true,
+                    'label' => 'Territory',
+                    'name' => 'id_territory',
+                    'required' => false,
                     'options' => array(
-                        'query' => $employees,
-                        'id' => 'id',
-                        'name' => 'firstname'
+                        'query' => $territories,
+                        'id' => 'id_territory',
+                        'name' => 'name'
                     ),
                     'col' => '4'
                 )
