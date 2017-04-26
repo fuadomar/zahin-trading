@@ -2,16 +2,7 @@
 include(_PS_MODULE_DIR_.'territory'.DIRECTORY_SEPARATOR.'territory.php');
 
 class AdminCustomersController extends AdminCustomersControllerCore {
-    public function __construct() {
-        parent::__construct();
-
-        if(!$this->context->employee->isSuperAdmin()) {
-            $this->_where = ' AND a.`id_employee` = ' . $this->context->employee->id;
-        }
-    }
-
-    public function renderForm()
-    {
+    public function renderForm() {
         /** @var Customer $obj */
         if (!($obj = $this->loadObject(true))) {
             return;
@@ -172,7 +163,7 @@ class AdminCustomersController extends AdminCustomersControllerCore {
         if ($this->context->employee->isSuperAdmin()) {
             $territories = Territory::getTerritories();
         } else {
-            $territories = array($this->context->employee);
+            $territories = array($this->context->employee->territory);
         }
 
         $this->fields_form['input'] = array_merge(
