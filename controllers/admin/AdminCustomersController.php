@@ -2,6 +2,53 @@
 include(_PS_MODULE_DIR_.'territory'.DIRECTORY_SEPARATOR.'territory.php');
 
 class AdminCustomersController extends AdminCustomersControllerCore {
+    /** @var array profiles list */
+    protected $territories_array = array();
+
+    public function __construct()
+    {
+        parent::__construct();
+
+        $territories = TerritoryModel::getAll();
+        if (!$territories) {
+            $this->errors[] = Tools::displayError('No territory.');
+        } else {
+            foreach ($territories as $territory) {
+                $this->territories_array[$territory['name']] = $territory['name'];
+            }
+        }
+
+        $this->_select = '
+        a.date_add, gl.name as title, (
+            SELECT SUM(total_paid_real / conversion_rate)
+            FROM '._DB_PREFIX_.'orders o
+            WHERE o.id_customer = a.id_customer
+            '.Shop::addSqlRestriction(Shop::SHARE_ORDER, 'o').'
+            AND o.valid = 1
+        ) as total_spent, (
+            SELECT c.date_add FROM '._DB_PREFIX_.'guest g
+            LEFT JOIN '._DB_PREFIX_.'connections c ON c.id_guest = g.id_guest
+            WHERE g.id_customer = a.id_customer
+            ORDER BY c.date_add DESC
+            LIMIT 1
+        ) as connect,
+        t.`name` AS territory';
+
+        $this->_join = 'LEFT JOIN '._DB_PREFIX_.'gender_lang gl ON (a.id_gender = gl.id_gender AND gl.id_lang = '.(int)$this->context->language->id.')
+                        LEFT JOIN `'._DB_PREFIX_.'territory` t ON a.`id_territory` = t.`id_territory`';
+
+        $territory_column = array(
+            'territory' => array('title' => $this->l('Territory'), 'type' => 'select', 'list' => $this->territories_array,
+                'filter_key' => 't!name', 'class' => 'fixed-width-lg')
+        );
+
+        $this->fields_list = array_merge(
+            array_slice($this->fields_list, 0, 5),
+            $territory_column,
+            array_slice($this->fields_list, 5)
+        );
+    }
+
     public function renderForm() {
         /** @var Customer $obj */
         if (!($obj = $this->loadObject(true))) {
