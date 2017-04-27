@@ -2,6 +2,48 @@
 include(_PS_MODULE_DIR_.'territory'.DIRECTORY_SEPARATOR.'territory.php');
 
 class AdminEmployeesController extends AdminEmployeesControllerCore {
+    /** @var array profiles list */
+    protected $territories_array = array();
+
+    public function __construct()
+    {
+        parent::__construct();
+
+        $territories = TerritoryModel::getAll();
+        if (!$territories) {
+            $this->errors[] = Tools::displayError('No territory.');
+        } else {
+            foreach ($territories as $territory) {
+                $this->territories_array[$territory['name']] = $territory['name'];
+            }
+        }
+
+        $this->fields_list = array(
+            'id_employee' => array('title' => $this->l('ID'), 'align' => 'center', 'class' => 'fixed-width-xs'),
+            'firstname' => array('title' => $this->l('First Name')),
+            'lastname' => array('title' => $this->l('Last Name')),
+            'email' => array('title' => $this->l('Email address')),
+            'territory' => array('title' => $this->l('Territory'), 'type' => 'select', 'list' => $this->territories_array,
+                'filter_key' => 't!name', 'class' => 'fixed-width-lg'),
+            'profile' => array('title' => $this->l('Profile'), 'type' => 'select', 'list' => $this->profiles_array,
+                'filter_key' => 'pl!name', 'class' => 'fixed-width-lg'),
+            'active' => array('title' => $this->l('Active'), 'align' => 'center', 'active' => 'status',
+                'type' => 'bool', 'class' => 'fixed-width-sm'),
+        );
+    }
+
+    public function renderList()
+    {
+        $this->_select = 'pl.`name` AS profile, t.`name` AS territory';
+        $this->_join = 'LEFT JOIN `'._DB_PREFIX_.'profile` p ON a.`id_profile` = p.`id_profile`
+		LEFT JOIN `'._DB_PREFIX_.'profile_lang` pl ON (pl.`id_profile` = p.`id_profile` AND pl.`id_lang` = '
+            .(int)$this->context->language->id.')
+        LEFT JOIN `'._DB_PREFIX_.'territory` t ON a.`id_territory` = t.`id_territory`';
+        $this->_use_found_rows = false;
+
+        return AdminController::renderList();
+    }
+
     public function renderForm() {
         /** @var Employee $obj */
         if (!($obj = $this->loadObject(true))) {

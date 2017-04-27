@@ -37,7 +37,7 @@ class Employee extends EmployeeCore {
             'id_last_order' =>             array('type' => self::TYPE_INT, 'validate' => 'isUnsignedInt'),
             'id_last_customer_message' =>  array('type' => self::TYPE_INT, 'validate' => 'isUnsignedInt'),
             'id_last_customer' =>          array('type' => self::TYPE_INT, 'validate' => 'isUnsignedInt'),
-            'id_territory' =>              array('type' => self::TYPE_INT, 'validate' => 'isUnsignedId'),
+            'id_territory' =>              array('type' => self::TYPE_NOTHING, 'required' => false),
         ),
     );
 
