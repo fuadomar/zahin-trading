@@ -49,6 +49,14 @@ class AdminCustomersController extends AdminCustomersControllerCore {
         );
     }
 
+    public function getList($id_lang, $orderBy = null, $orderWay = null, $start = 0, $limit = null, $id_lang_shop = null) {
+        if(!$this->context->employee->isSuperAdmin()) {
+            $this->_where = ' AND a.`id_territory` = ' . $this->context->employee->id_territory;
+        }
+
+        parent::getList($id_lang, $orderBy, $orderWay, $start, $limit, $id_lang_shop);
+    }
+
     public function renderForm() {
         /** @var Customer $obj */
         if (!($obj = $this->loadObject(true))) {
@@ -223,7 +231,11 @@ class AdminCustomersController extends AdminCustomersControllerCore {
                     'options' => array(
                         'query' => $territories,
                         'id' => 'id_territory',
-                        'name' => 'name'
+                        'name' => 'name',
+                        'default' => array(
+                            'value' => '',
+                            'label' => $this->l('-- Choose --')
+                        )
                     ),
                     'col' => '4'
                 )

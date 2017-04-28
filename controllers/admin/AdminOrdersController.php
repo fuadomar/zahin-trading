@@ -4,7 +4,7 @@ class AdminOrdersController extends AdminOrdersControllerCore {
         parent::__construct();
 
         if(!$this->context->employee->isSuperAdmin()) {
-            $this->_where = ' AND c.`id_employee` = ' . $this->context->employee->id;
+            $this->_where = ' AND c.`id_territory` = ' . $this->context->employee->id_territory;
         }
     }
 }

@@ -40,7 +40,7 @@ class Customer extends CustomerCore {
             'id_lang' =>                    array('type' => self::TYPE_INT, 'validate' => 'isUnsignedId', 'copy_post' => false),
             'date_add' =>                   array('type' => self::TYPE_DATE, 'validate' => 'isDate', 'copy_post' => false),
             'date_upd' =>                   array('type' => self::TYPE_DATE, 'validate' => 'isDate', 'copy_post' => false),
-            'id_territory' =>               array('type' => self::TYPE_INT, 'validate' => 'isUnsignedId'),
+            'id_territory' =>               array('type' => self::TYPE_NOTHING, 'required' => false),
         ),
     );
 
@@ -59,7 +59,7 @@ class Customer extends CustomerCore {
         if ($context->employee->isSuperAdmin()) {
             $sql_base = 'SELECT * FROM `' . _DB_PREFIX_ . 'customer` WHERE 1';
         } else {
-            $sql_base = 'SELECT * FROM `'._DB_PREFIX_.'customer` WHERE id_employee = '.$context->employee->id;
+            $sql_base = 'SELECT * FROM `'._DB_PREFIX_.'customer` WHERE id_territory = '.$context->employee->id_territory;
         }
 
         $sql = '('.$sql_base.' AND `email` LIKE \'%'.pSQL($query).'%\' '.Shop::addSqlRestriction(Shop::SHARE_CUSTOMER).')';
