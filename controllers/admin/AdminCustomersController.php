@@ -37,14 +37,18 @@ class AdminCustomersController extends AdminCustomersControllerCore {
         $this->_join = 'LEFT JOIN '._DB_PREFIX_.'gender_lang gl ON (a.id_gender = gl.id_gender AND gl.id_lang = '.(int)$this->context->language->id.')
                         LEFT JOIN `'._DB_PREFIX_.'territory` t ON a.`id_territory` = t.`id_territory`';
 
-        $territory_column = array(
+        $custom_columns = array(
             'territory' => array('title' => $this->l('Territory'), 'type' => 'select', 'list' => $this->territories_array,
-                'filter_key' => 't!name', 'class' => 'fixed-width-lg')
+                'filter_key' => 't!name', 'class' => 'fixed-width-lg'),
+            'customer_type' => array('title' => $this->l('Customer Type'), 'type' => 'select',
+                'list' => array('Retailer' => 'Retailer', 'Wholesaler' => 'Wholesaler'),
+                'filter_key' => 'a!customer_type', 'class' => 'fixed-width-lg'),
+            'business_type' => array('title' => $this->l('Business Type'), 'class' => 'fixed-width-lg')
         );
 
         $this->fields_list = array_merge(
             array_slice($this->fields_list, 0, 5),
-            $territory_column,
+            $custom_columns,
             array_slice($this->fields_list, 5)
         );
     }
@@ -125,6 +129,30 @@ class AdminCustomersController extends AdminCustomersControllerCore {
                     'col' => '4',
                     'hint' => ($obj->id ? $this->l('Leave this field blank if there\'s no change.') :
                         sprintf($this->l('Password should be at least %s characters long.'), Validate::PASSWORD_LENGTH))
+                ),
+                array(
+                    'type' => 'radio',
+                    'label' => $this->l('Customer Type'),
+                    'name' => 'customer_type',
+                    'required' => false,
+                    'values' => array(
+                        array(
+                            'id' => 'retailer',
+                            'value' => 'Retailer',
+                            'label' => $this->l('Retailer')
+                        ),
+                        array(
+                            'id' => 'wholesaler',
+                            'value' => 'Wholesaler',
+                            'label' => $this->l('Wholesaler')
+                        )
+                    )
+                ),
+                array(
+                    'type' => 'text',
+                    'label' => $this->l('Business Type'),
+                    'name' => 'business_type',
+                    'col' => '4'
                 ),
                 array(
                     'type' => 'birthday',

@@ -3,6 +3,12 @@ class Customer extends CustomerCore {
     /** @var int Customer id */
     public $id_territory;
 
+    /** @var string Customer Type */
+    public $customer_type;
+
+    /** @var string Business Type */
+    public $business_type;
+
     /**
      * @see ObjectModel::$definition
      */
@@ -16,6 +22,8 @@ class Customer extends CustomerCore {
             'email' =>                      array('type' => self::TYPE_STRING, 'validate' => 'isEmail', 'required' => true, 'size' => 128),
             'passwd' =>                     array('type' => self::TYPE_STRING, 'validate' => 'isPasswd', 'required' => true, 'size' => 32),
             'last_passwd_gen' =>            array('type' => self::TYPE_STRING, 'copy_post' => false),
+            'customer_type' =>              array('type' => self::TYPE_STRING),
+            'business_type' =>              array('type' => self::TYPE_STRING),
             'id_gender' =>                  array('type' => self::TYPE_INT, 'validate' => 'isUnsignedId'),
             'birthday' =>                   array('type' => self::TYPE_DATE, 'validate' => 'isBirthDate'),
             'newsletter' =>                 array('type' => self::TYPE_BOOL, 'validate' => 'isBool'),
