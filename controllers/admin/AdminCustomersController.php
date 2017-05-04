@@ -2,7 +2,7 @@
 include(_PS_MODULE_DIR_.'territory'.DIRECTORY_SEPARATOR.'territory.php');
 
 class AdminCustomersController extends AdminCustomersControllerCore {
-    /** @var array profiles list */
+    /** @var array territory list */
     protected $territories_array = array();
 
     public function __construct()
