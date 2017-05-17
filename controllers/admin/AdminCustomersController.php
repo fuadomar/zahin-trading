@@ -1,15 +1,67 @@
 <?php
+include(_PS_MODULE_DIR_.'territory'.DIRECTORY_SEPARATOR.'territory.php');
+
 class AdminCustomersController extends AdminCustomersControllerCore {
-    public function __construct() {
+    /** @var array territory list */
+    protected $territories_array = array();
+
+    public function __construct()
+    {
         parent::__construct();
 
-        if(!$this->context->employee->isSuperAdmin()) {
-            $this->_where = ' AND a.`id_employee` = ' . $this->context->employee->id;
+        $territories = TerritoryModel::getAll();
+        if (!$territories) {
+            $this->errors[] = Tools::displayError('No territory.');
+        } else {
+            foreach ($territories as $territory) {
+                $this->territories_array[$territory['name']] = $territory['name'];
+            }
         }
+
+        $this->_select = '
+        a.date_add, gl.name as title, (
+            SELECT SUM(total_paid_real / conversion_rate)
+            FROM '._DB_PREFIX_.'orders o
+            WHERE o.id_customer = a.id_customer
+            '.Shop::addSqlRestriction(Shop::SHARE_ORDER, 'o').'
+            AND o.valid = 1
+        ) as total_spent, (
+            SELECT c.date_add FROM '._DB_PREFIX_.'guest g
+            LEFT JOIN '._DB_PREFIX_.'connections c ON c.id_guest = g.id_guest
+            WHERE g.id_customer = a.id_customer
+            ORDER BY c.date_add DESC
+            LIMIT 1
+        ) as connect,
+        t.`name` AS territory';
+
+        $this->_join = 'LEFT JOIN '._DB_PREFIX_.'gender_lang gl ON (a.id_gender = gl.id_gender AND gl.id_lang = '.(int)$this->context->language->id.')
+                        LEFT JOIN `'._DB_PREFIX_.'territory` t ON a.`id_territory` = t.`id_territory`';
+
+        $custom_columns = array(
+            'territory' => array('title' => $this->l('Territory'), 'type' => 'select', 'list' => $this->territories_array,
+                'filter_key' => 't!name', 'class' => 'fixed-width-lg'),
+            'customer_type' => array('title' => $this->l('Customer Type'), 'type' => 'select',
+                'list' => array('Retailer' => 'Retailer', 'Wholesaler' => 'Wholesaler'),
+                'filter_key' => 'a!customer_type', 'class' => 'fixed-width-lg'),
+            'business_type' => array('title' => $this->l('Business Type'), 'class' => 'fixed-width-lg')
+        );
+
+        $this->fields_list = array_merge(
+            array_slice($this->fields_list, 0, 5),
+            $custom_columns,
+            array_slice($this->fields_list, 5)
+        );
     }
 
-    public function renderForm()
-    {
+    public function getList($id_lang, $orderBy = null, $orderWay = null, $start = 0, $limit = null, $id_lang_shop = null) {
+        if(!$this->context->employee->isSuperAdmin()) {
+            $this->_where = ' AND a.`id_territory` = ' . $this->context->employee->id_territory;
+        }
+
+        parent::getList($id_lang, $orderBy, $orderWay, $start, $limit, $id_lang_shop);
+    }
+
+    public function renderForm() {
         /** @var Customer $obj */
         if (!($obj = $this->loadObject(true))) {
             return;
@@ -77,6 +129,30 @@ class AdminCustomersController extends AdminCustomersControllerCore {
                     'col' => '4',
                     'hint' => ($obj->id ? $this->l('Leave this field blank if there\'s no change.') :
                         sprintf($this->l('Password should be at least %s characters long.'), Validate::PASSWORD_LENGTH))
+                ),
+                array(
+                    'type' => 'radio',
+                    'label' => $this->l('Customer Type'),
+                    'name' => 'customer_type',
+                    'required' => false,
+                    'values' => array(
+                        array(
+                            'id' => 'retailer',
+                            'value' => 'Retailer',
+                            'label' => $this->l('Retailer')
+                        ),
+                        array(
+                            'id' => 'wholesaler',
+                            'value' => 'Wholesaler',
+                            'label' => $this->l('Wholesaler')
+                        )
+                    )
+                ),
+                array(
+                    'type' => 'text',
+                    'label' => $this->l('Business Type'),
+                    'name' => 'business_type',
+                    'col' => '4'
                 ),
                 array(
                     'type' => 'birthday',
@@ -168,22 +244,26 @@ class AdminCustomersController extends AdminCustomersControllerCore {
         }
 
         if ($this->context->employee->isSuperAdmin()) {
-            $employees = Employee::getTerritoryManagers();
+            $territories = Territory::getTerritories();
         } else {
-            $employees = array($this->context->employee);
+            $territories = array($this->context->employee->territory);
         }
 
         $this->fields_form['input'] = array_merge(
             array(
                 array(
                     'type' => 'select',
-                    'label' => $this->l('Territory Manager'),
-                    'name' => 'id_employee',
-                    'required' => true,
+                    'label' => 'Territory',
+                    'name' => 'id_territory',
+                    'required' => false,
                     'options' => array(
-                        'query' => $employees,
-                        'id' => 'id',
-                        'name' => 'firstname'
+                        'query' => $territories,
+                        'id' => 'id_territory',
+                        'name' => 'name',
+                        'default' => array(
+                            'value' => '',
+                            'label' => $this->l('-- Choose --')
+                        )
                     ),
                     'col' => '4'
                 )
