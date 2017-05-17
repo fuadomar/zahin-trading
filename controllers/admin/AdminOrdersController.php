@@ -4,6 +4,7 @@ include(_PS_MODULE_DIR_.'territory'.DIRECTORY_SEPARATOR.'territory.php');
 class AdminOrdersController extends AdminOrdersControllerCore {
     /** @var array territory list */
     protected $territories_array = array();
+    protected $ordered_by_array = array();
 
     public function __construct() {
         parent::__construct();
@@ -13,13 +14,10 @@ class AdminOrdersController extends AdminOrdersControllerCore {
                 $this->_where = ' AND c.`id_territory` = ' . $this->context->employee->id_territory;
             }
 
+            $this->ordered_by_array = array('Customer' => 'Customer', 'Employee' => 'Employee');
             $territories = TerritoryModel::getAll();
-            if (!$territories) {
-                $this->errors[] = Tools::displayError('No territory.');
-            } else {
-                foreach ($territories as $territory) {
-                    $this->territories_array[$territory['name']] = $territory['name'];
-                }
+            foreach ($territories as $territory) {
+                $this->territories_array[$territory['name']] = $territory['name'];
             }
 
             $this->_join = $this->_join.
@@ -27,7 +25,9 @@ class AdminOrdersController extends AdminOrdersControllerCore {
 
             $custom_columns = array(
                 'territory' => array('title' => $this->l('Territory'), 'type' => 'select', 'list' => $this->territories_array,
-                    'filter_key' => 't!name', 'class' => 'fixed-width-lg')
+                    'filter_key' => 't!name', 'class' => 'fixed-width-lg'),
+                'ordered_by' => array('title' => $this->l('Ordered By'), 'type' => 'select', 'list' => $this->ordered_by_array,
+                    'filter_key' => 'a!ordered_by', 'class' => 'fixed-width-lg')
             );
 
             $this->fields_list = array_merge(
