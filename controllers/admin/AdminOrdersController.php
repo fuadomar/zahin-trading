@@ -747,8 +747,8 @@ class AdminOrdersController extends AdminOrdersControllerCore {
                     $payment_module->validateOrder(
                         (int)$cart->id, (int)$id_order_state,
                         $cart->getOrderTotal(true, Cart::BOTH), $payment_module->displayName, $this->l('Manual order -- Employee:').' '.
-                        substr($employee->firstname, 0, 1).'. '.$employee->lastname, array(), null, false, $cart->secure_key,
-                    null, 'Employee');
+                        substr($employee->firstname, 0, 1).'. '.$employee->lastname, array(), null, false, $cart->secure_key
+                    );
                     if ($payment_module->currentOrder) {
                         Tools::redirectAdmin(self::$currentIndex.'&id_order='.$payment_module->currentOrder.'&vieworder'.'&token='.$this->token);
                     }

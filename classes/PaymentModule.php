@@ -14,14 +14,13 @@ class PaymentModule extends PaymentModuleCore {
      * @param bool    $dont_touch_amount
      * @param bool    $secure_key
      * @param Shop    $shop
-     * @param string  $ordered_by
      *
      * @return bool
      * @throws PrestaShopException
      */
     public function validateOrder($id_cart, $id_order_state, $amount_paid, $payment_method = 'Unknown',
                                   $message = null, $extra_vars = array(), $currency_special = null, $dont_touch_amount = false,
-                                  $secure_key = false, Shop $shop = null, $ordered_by = null)
+                                  $secure_key = false, Shop $shop = null)
     {
         if (self::DEBUG_MODE) {
             PrestaShopLogger::addLog('PaymentModule::validateOrder - Function called', 1, null, 'Cart', (int)$id_cart, true);
@@ -193,7 +192,7 @@ class PaymentModule extends PaymentModuleCore {
                     $order->invoice_date = '0000-00-00 00:00:00';
                     $order->delivery_date = '0000-00-00 00:00:00';
 
-                    $order->ordered_by = $ordered_by;
+                    $order->ordered_by = isset($this->context->employee) ? 'Employee' : 'Customer';
 
                     if (self::DEBUG_MODE) {
                         PrestaShopLogger::addLog('PaymentModule::validateOrder - Order is about to be added', 1, null, 'Cart', (int)$id_cart, true);
@@ -615,7 +614,6 @@ class PaymentModule extends PaymentModuleCore {
                             '{total_shipping}' => Tools::displayPrice($order->total_shipping, $this->context->currency, false),
                             '{total_wrapping}' => Tools::displayPrice($order->total_wrapping, $this->context->currency, false),
                             '{total_tax_paid}' => Tools::displayPrice(($order->total_products_wt - $order->total_products) + ($order->total_shipping_tax_incl - $order->total_shipping_tax_excl), $this->context->currency, false));
-//                        '{ordered_by}' => 'Employee3');
 
                         if (is_array($extra_vars)) {
                             $data = array_merge($data, $extra_vars);
