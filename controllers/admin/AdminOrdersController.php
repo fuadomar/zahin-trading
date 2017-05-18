@@ -10,12 +10,18 @@ class AdminOrdersController extends AdminOrdersControllerCore {
         parent::__construct();
 
         if(Configuration::get('IS_TERRITORY')) {
-            if(!$this->context->employee->isSuperAdmin()) {
+            if($this->context->employee->isSuperAdmin()) {
+                $territories = TerritoryModel::getAll();
+            } else if($this->context->employee->id_territory > 0) {
+                $territories = TerritoryModel::getTerritoryWithId($this->context->employee->id_territory);
                 $this->_where = ' AND c.`id_territory` = ' . $this->context->employee->id_territory;
+            } else {
+                $territories = array();
+                $this->_where = ' AND FALSE';
             }
 
             $this->ordered_by_array = array('Customer' => 'Customer', 'Employee' => 'Employee');
-            $territories = TerritoryModel::getAll();
+
             foreach ($territories as $territory) {
                 $this->territories_array[$territory['name']] = $territory['name'];
             }

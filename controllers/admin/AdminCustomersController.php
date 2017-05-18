@@ -9,13 +9,16 @@ class AdminCustomersController extends AdminCustomersControllerCore {
     {
         parent::__construct();
 
-        $territories = TerritoryModel::getAll();
-        if (!$territories) {
-            $this->errors[] = Tools::displayError('No territory.');
+        if($this->context->employee->isSuperAdmin()) {
+            $territories = TerritoryModel::getAll();
+        } else if($this->context->employee->id_territory > 0) {
+            $territories = TerritoryModel::getTerritoryWithId($this->context->employee->id_territory);
         } else {
-            foreach ($territories as $territory) {
-                $this->territories_array[$territory['name']] = $territory['name'];
-            }
+            $territories = array();
+        }
+
+        foreach ($territories as $territory) {
+            $this->territories_array[$territory['name']] = $territory['name'];
         }
 
         $this->_select = '
@@ -55,7 +58,11 @@ class AdminCustomersController extends AdminCustomersControllerCore {
 
     public function getList($id_lang, $orderBy = null, $orderWay = null, $start = 0, $limit = null, $id_lang_shop = null) {
         if(!$this->context->employee->isSuperAdmin()) {
-            $this->_where = ' AND a.`id_territory` = ' . $this->context->employee->id_territory;
+            if($this->context->employee->id_territory > 0) {
+                $this->_where = ' AND a.`id_territory` = ' . $this->context->employee->id_territory;
+            } else {
+                $this->_where = ' AND FALSE';
+            }
         }
 
         parent::getList($id_lang, $orderBy, $orderWay, $start, $limit, $id_lang_shop);
